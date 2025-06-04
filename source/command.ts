@@ -45,6 +45,15 @@ async function addComponents(...components: string[]) {
   const hasSource = fs.existsSync(componentsFilePath),
     stashPath = path.join(componentsFilePath, '../.stash');
 
+  if (!components[0]) return;
+
+  const gitIgnored =
+    fs.existsSync('.gitignore') &&
+    ((await fs.readFile('.gitignore')) + '').match(
+      new RegExp(String.raw`^${componentsFilePath}`, 'm')
+    );
+  if (!gitIgnored) await fs.writeFile('.gitignore', `${componentsFilePath}/*`);
+
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
   await $`shadcn add -y -o ${components}`;
@@ -74,7 +83,7 @@ async function editComponent(component: string) {
     .join(componentsFilePath, `${component}.tsx`)
     .replace(/\\/g, '/');
 
-  await fs.appendFile('.gitignore', `!${filePath}`);
+  await fs.appendFile('.gitignore', `\n!${filePath}`);
 
   if (fs.existsSync('.git')) await $`git add ${filePath}`;
 
