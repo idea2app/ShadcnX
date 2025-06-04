@@ -135,4 +135,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Comment to indicate where to remove component paths for the `edit` subcommand
+# Test
+test/*
+!test/package.json
+!test/tsconfig.json

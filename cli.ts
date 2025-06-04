@@ -1,56 +1,94 @@
 #!/usr/bin/env node
 
-import { $ } from 'zx';
-import fs from 'fs';
-import path from 'path';
+import 'array-unique-proposal';
 
-const args = process.argv.slice(2);
-const command = args[0];
+import { $, fs, path } from 'zx';
 
-const componentsFilePath = path.join(__dirname, 'components', 'ui', 'index.ini');
+$.verbose = true;
 
-async function addComponents(components: string[]) {
-  for (const component of components) {
-    await $`npx shadcn add ${component}`;
-    fs.appendFileSync(componentsFilePath, `${component}\n`);
-  }
+const [command, ...args] = process.argv.slice(2);
+
+const configurationTarget = 'components.json';
+
+if (!fs.existsSync(configurationTarget)) {
+  const configurationSource = (
+    new URL('components.json', import.meta.url) + ''
+  ).replace('file://', '');
+
+  await fs.copy(configurationSource, configurationTarget);
+}
+const componentsFilePath = 'components/ui';
+const indexFilePath = path.join(componentsFilePath, '../index.ini');
+
+await fs.ensureDir(componentsFilePath);
+
+const loadIndex = async () =>
+  (fs.existsSync(indexFilePath) ? (await fs.readFile(indexFilePath)) + '' : '')
+    .split(/[\r\n]+/)
+    .filter(Boolean);
+
+const saveIndex = (list: string[]) =>
+  fs.writeFile(indexFilePath, list.join('\n'));
+
+async function addIndex(...URIs: string[]) {
+  const oldList = await loadIndex();
+
+  oldList.push(...URIs);
+
+  const newList = oldList.uniqueBy();
+
+  await saveIndex(newList);
+
+  return newList;
+}
+
+async function addComponents(...components: string[]) {
+  const stashPath = path.join(componentsFilePath, '../.stash');
+
+  await fs.move(componentsFilePath, stashPath, { overwrite: true });
+
+  await $`shadcn add -y -o ${components}`;
+
+  await addIndex(...components);
+
+  await fs.move(stashPath, componentsFilePath, { overwrite: true });
 }
 
 async function editComponent(component: string) {
-  const gitignorePath = path.join(__dirname, '.gitignore');
-  const gitignoreContent = fs.readFileSync(gitignorePath, 'utf-8');
-  const newGitignoreContent = gitignoreContent.replace(new RegExp(`^${component}$`, 'm'), '');
-  fs.writeFileSync(gitignorePath, newGitignoreContent);
+  const oldList = await loadIndex();
 
-  await $`git add ${component}`;
-  await $`git commit -m "Add ${component}"`;
+  const sameIndex = oldList.findIndex(URI => URI === component);
+  const nameIndex =
+    sameIndex < 0
+      ? oldList.findIndex(URI => URI.endsWith(`/${component}`))
+      : sameIndex;
+  if (nameIndex < 0)
+    throw new ReferenceError(
+      `Component "${component}" is not found in ${indexFilePath}`
+    );
+  oldList.splice(nameIndex, 1);
 
-  try {
-    await $`code ${component}`;
-  } catch {
-    await $`open-cli ${component}`;
-  }
+  await saveIndex(oldList);
+
+  const filePath = path.join(componentsFilePath, `${component}.tsx`);
+
+  await fs.appendFile('.gitignore', `!${filePath}`);
+
+  if (fs.existsSync('.git')) await $`git add ${filePath}`;
 }
 
-async function installComponents() {
-  const components = fs.readFileSync(componentsFilePath, 'utf-8').split('\n').filter(Boolean);
-  await $`npx shadcn add ${components.join(' ')}`;
-}
+const installComponents = async () => addComponents(...(await loadIndex()));
 
-(async () => {
-  switch (command) {
-    case 'add':
-      const componentsToAdd = args.slice(1);
-      await addComponents(componentsToAdd);
-      break;
-    case 'edit':
-      const componentToEdit = args[1];
-      await editComponent(componentToEdit);
-      break;
-    case 'install':
-      await installComponents();
-      break;
-    default:
-      console.log('Unknown command');
-  }
-})();
+switch (command) {
+  case 'add':
+    await addComponents(...args);
+    break;
+  case 'edit':
+    await editComponent(args[0]);
+    break;
+  case 'install':
+    await installComponents();
+    break;
+  default:
+    console.log('Unknown command');
+}

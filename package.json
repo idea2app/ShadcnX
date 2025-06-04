@@ -1,18 +1,34 @@
 {
-  "name": "shadcnx-cli",
-  "version": "1.0.0",
-  "description": "A command line tool for ShadcnX",
-  "main": "cli.ts",
-  "bin": {
-    "shadcnx": "./cli.ts"
-  },
+  "name": "shadcn-x",
+  "version": "0.3.0",
+  "description": "A command line helper for Shadcn UI",
+  "type": "module",
+  "bin": "./dist/cli.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "install": "npm i shadcn -g",
+    "test": "cd test  &&  tsx ../cli",
+    "build": "rm -rf dist/  &&  tsc",
+    "prepublishOnly": "npm t add button badge  &&  npm run build"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "shiy2008@gmail.com",
+  "license": "LGPL-3.0-or-later",
   "dependencies": {
-    "zx": "^7.0.0",
-    "simple-git": "^2.47.0"
+    "array-unique-proposal": "^0.3.4",
+    "zx": "^8.5.5"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid"
   }
 }
