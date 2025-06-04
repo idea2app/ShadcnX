@@ -1,17 +1,25 @@
 {
-  "name": "shadcn-x",
+  "name": "shadcn-helper",
   "version": "0.3.0",
+  "license": "LGPL-3.0-or-later",
+  "author": "shiy2008@gmail.com",
   "description": "A command line helper for Shadcn UI CLI, `git commit` modified component codes only.",
+  "keywords": [
+    "shadcn",
+    "component",
+    "command",
+    "helper"
+  ],
+  "homepage": "https://github.com/idea2app/ShadcnX#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idea2app/ShadcnX.git"
+  },
+  "bugs": {
+    "url": "https://github.com/idea2app/ShadcnX/issues"
+  },
   "type": "module",
   "bin": "./dist/command.js",
-  "scripts": {
-    "install": "npm i shadcn -g",
-    "test": "cd test  &&  tsx ../source/command",
-    "build": "rm -rf dist/  &&  tsc  &&  cp source/components.json dist/",
-    "prepublishOnly": "npm t add button badge  &&  npm run build"
-  },
-  "author": "shiy2008@gmail.com",
-  "license": "LGPL-3.0-or-later",
   "dependencies": {
     "array-unique-proposal": "^0.3.4",
     "open": "^10.1.2",
@@ -31,5 +39,11 @@
   "prettier": {
     "singleQuote": true,
     "arrowParens": "avoid"
+  },
+  "scripts": {
+    "install": "pnpm i shadcn -g  ||  npm i shadcn -g",
+    "test": "cd test  &&  tsx ../source/command",
+    "build": "rm -rf dist/  &&  tsc  &&  cp source/components.json dist/",
+    "prepublishOnly": "npm t add button badge  &&  npm run build"
   }
 }

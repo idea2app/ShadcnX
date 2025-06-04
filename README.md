@@ -1,11 +1,13 @@
-# ShadcnX
+# ShadcnX CLI
 
 A command line helper for [Shadcn UI CLI][1], `git commit` modified component codes only.
+
+[![CI & CD](https://github.com/idea2app/ShadcnX/actions/workflows/main.yml/badge.svg)][2]
 
 ## Installation
 
 ```bash
-npm i shadcn-x -g
+npm i shadcn-helper -g
 ```
 
 ## Usage
@@ -13,13 +15,13 @@ npm i shadcn-x -g
 ### add components
 
 ```bash
-shadcn-x add official-component-name https://third-party.org/path/to/component
+shadcn-helper add official-component-name https://third-party.org/path/to/component
 ```
 
 ### edit a component
 
 ```bash
-shadcn-x edit component-name
+shadcn-helper edit component-name
 ```
 
 ### install added components
@@ -29,7 +31,7 @@ shadcn-x edit component-name
   "name": "my-web-app",
   "private": true,
   "scripts": {
-    "install": "npx shadcn-x install"
+    "install": "npx shadcn-helper install"
   }
 }
 ```
@@ -39,3 +41,4 @@ shadcn-x edit component-name
 1. https://github.com/idea2app/Next-shadcn-ts
 
 [1]: https://ui.shadcn.com/docs/cli
+[2]: https://github.com/idea2app/ShadcnX/actions/workflows/main.yml

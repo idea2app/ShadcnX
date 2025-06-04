@@ -5,6 +5,8 @@ import 'array-unique-proposal';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
+import { localPathOf } from './utility.js';
+
 $.verbose = true;
 
 const [command, ...args] = process.argv.slice(2);
@@ -12,9 +14,7 @@ const [command, ...args] = process.argv.slice(2);
 const configurationTarget = 'components.json';
 
 if (!fs.existsSync(configurationTarget)) {
-  const configurationSource = (
-    new URL('components.json', import.meta.url) + ''
-  ).replace('file://', '');
+  const configurationSource = localPathOf(import.meta.url, configurationTarget);
 
   await fs.copy(configurationSource, configurationTarget);
 }
@@ -72,7 +72,9 @@ async function editComponent(component: string) {
 
   await saveIndex(oldList);
 
-  const filePath = path.join(componentsFilePath, `${component}.tsx`);
+  const filePath = path
+    .join(componentsFilePath, `${component}.tsx`)
+    .replace(/\\/g, '/');
 
   await fs.appendFile('.gitignore', `!${filePath}`);
 
