@@ -5,7 +5,7 @@ import 'array-unique-proposal';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
-import { localPathOf } from './utility.js';
+import { localPathOf, moveAll } from './utility.js';
 
 $.verbose = true;
 
@@ -45,15 +45,13 @@ async function addComponents(...components: string[]) {
   const hasSource = fs.existsSync(componentsFilePath),
     stashPath = path.join(componentsFilePath, '../.stash');
 
-  if (hasSource)
-    await fs.move(componentsFilePath, stashPath, { overwrite: true });
+  if (hasSource) await moveAll(componentsFilePath, stashPath);
 
   await $`shadcn add -y -o ${components}`;
 
   await addIndex(...components);
 
-  if (hasSource)
-    await fs.move(stashPath, componentsFilePath, { overwrite: true });
+  if (hasSource) await moveAll(stashPath, componentsFilePath);
 }
 
 async function editComponent(component: string) {

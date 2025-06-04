@@ -1,6 +1,6 @@
 {
   "name": "shadcn-helper",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "LGPL-3.0-or-later",
   "author": "shiy2008@gmail.com",
   "description": "A command line helper for Shadcn UI CLI, `git commit` modified component codes only.",
@@ -44,6 +44,6 @@
     "install": "pnpm i shadcn -g  ||  npm i shadcn -g",
     "test": "cd test  &&  tsx ../source/command",
     "build": "rm -rf dist/  &&  tsc  &&  cp source/components.json dist/",
-    "prepublishOnly": "npm t add button badge  &&  npm run build"
+    "prepublishOnly": "npm t add badge button  &&  npm run build"
   }
 }
