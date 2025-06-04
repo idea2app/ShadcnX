@@ -1,0 +1,35 @@
+{
+  "name": "shadcn-x",
+  "version": "0.3.0",
+  "description": "A command line helper for Shadcn UI CLI, `git commit` modified component codes only.",
+  "type": "module",
+  "bin": "./dist/command.js",
+  "scripts": {
+    "install": "npm i shadcn -g",
+    "test": "cd test  &&  tsx ../source/command",
+    "build": "rm -rf dist/  &&  tsc  &&  cp source/components.json dist/",
+    "prepublishOnly": "npm t add button badge  &&  npm run build"
+  },
+  "author": "shiy2008@gmail.com",
+  "license": "LGPL-3.0-or-later",
+  "dependencies": {
+    "array-unique-proposal": "^0.3.4",
+    "open": "^10.1.2",
+    "zx": "^8.5.5"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^22.15.29",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "prettier": {
+    "singleQuote": true,
+    "arrowParens": "avoid"
+  }
+}

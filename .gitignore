@@ -134,3 +134,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Test
+test/*
+!test/package.json
+!test/tsconfig.json
