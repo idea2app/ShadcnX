@@ -3,6 +3,7 @@
 import 'array-unique-proposal';
 
 import { $, fs, path } from 'zx';
+import open from 'open';
 
 $.verbose = true;
 
@@ -19,8 +20,6 @@ if (!fs.existsSync(configurationTarget)) {
 }
 const componentsFilePath = 'components/ui';
 const indexFilePath = path.join(componentsFilePath, '../index.ini');
-
-await fs.ensureDir(componentsFilePath);
 
 const loadIndex = async () =>
   (fs.existsSync(indexFilePath) ? (await fs.readFile(indexFilePath)) + '' : '')
@@ -43,15 +42,18 @@ async function addIndex(...URIs: string[]) {
 }
 
 async function addComponents(...components: string[]) {
-  const stashPath = path.join(componentsFilePath, '../.stash');
+  const hasSource = fs.existsSync(componentsFilePath),
+    stashPath = path.join(componentsFilePath, '../.stash');
 
-  await fs.move(componentsFilePath, stashPath, { overwrite: true });
+  if (hasSource)
+    await fs.move(componentsFilePath, stashPath, { overwrite: true });
 
   await $`shadcn add -y -o ${components}`;
 
   await addIndex(...components);
 
-  await fs.move(stashPath, componentsFilePath, { overwrite: true });
+  if (hasSource)
+    await fs.move(stashPath, componentsFilePath, { overwrite: true });
 }
 
 async function editComponent(component: string) {
@@ -75,6 +77,12 @@ async function editComponent(component: string) {
   await fs.appendFile('.gitignore', `!${filePath}`);
 
   if (fs.existsSync('.git')) await $`git add ${filePath}`;
+
+  try {
+    await $`code ${filePath}`;
+  } catch {
+    await open(filePath, { wait: true });
+  }
 }
 
 const installComponents = async () => addComponents(...(await loadIndex()));
@@ -90,5 +98,5 @@ switch (command) {
     await installComponents();
     break;
   default:
-    console.log('Unknown command');
+    throw new ReferenceError(`Unsupported "${command}" command`);
 }

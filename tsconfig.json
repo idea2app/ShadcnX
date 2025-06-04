@@ -7,5 +7,5 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist"
   },
-  "include": ["./**/*.ts"]
+  "include": ["source/**/*.ts"]
 }
