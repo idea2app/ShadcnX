@@ -45,14 +45,15 @@ async function addComponents(...components: string[]) {
   const hasSource = fs.existsSync(componentsFilePath),
     stashPath = path.join(componentsFilePath, '../.stash');
 
-  if (!components[0]) return;
+  if (!components[0]) return console.warn('No component to add');
 
   const gitIgnored =
     fs.existsSync('.gitignore') &&
     ((await fs.readFile('.gitignore')) + '').match(
       new RegExp(String.raw`^${componentsFilePath}`, 'm')
     );
-  if (!gitIgnored) await fs.writeFile('.gitignore', `${componentsFilePath}/*`);
+  if (!gitIgnored)
+    await fs.appendFile('.gitignore', `\n${componentsFilePath}/*`);
 
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
