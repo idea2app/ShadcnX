@@ -13,10 +13,129 @@ const [command, ...args] = process.argv.slice(2);
 
 const configurationTarget = 'components.json';
 
-if (!fs.existsSync(configurationTarget)) {
-  const configurationSource = localPathOf(import.meta.url, configurationTarget);
+type Framework = 'react' | 'vue' | 'svelte';
 
-  await fs.copy(configurationSource, configurationTarget);
+interface FrameworkConfig {
+  cliCommand: string;
+  schema: string;
+  defaultConfig: object;
+}
+
+const frameworkConfigs: Record<Framework, FrameworkConfig> = {
+  react: {
+    cliCommand: 'shadcn',
+    schema: 'https://ui.shadcn.com/schema.json',
+    defaultConfig: {
+      $schema: 'https://ui.shadcn.com/schema.json',
+      tsx: true,
+      rsc: true,
+      aliases: {
+        components: '@/components',
+        utils: '@/lib/utils',
+      },
+      style: 'default',
+      tailwind: {
+        css: 'styles/global.css',
+        cssVariables: true,
+        config: 'tailwind.config.ts',
+        baseColor: 'gray',
+      },
+    },
+  },
+  vue: {
+    cliCommand: 'shadcn-vue',
+    schema: 'https://www.shadcn-vue.com/schema.json',
+    defaultConfig: {
+      $schema: 'https://www.shadcn-vue.com/schema.json',
+      aliases: {
+        components: '@/components',
+        utils: '@/lib/utils',
+      },
+      style: 'default',
+      tailwind: {
+        css: 'src/assets/index.css',
+        cssVariables: true,
+        config: 'tailwind.config.js',
+        baseColor: 'slate',
+      },
+    },
+  },
+  svelte: {
+    cliCommand: 'shadcn-svelte',
+    schema: 'https://www.shadcn-svelte.com/schema.json',
+    defaultConfig: {
+      $schema: 'https://www.shadcn-svelte.com/schema.json',
+      aliases: {
+        components: '$lib/components',
+        utils: '$lib/utils',
+      },
+      style: 'default',
+      tailwind: {
+        css: 'src/app.pcss',
+        cssVariables: true,
+        config: 'tailwind.config.js',
+        baseColor: 'slate',
+      },
+    },
+  },
+};
+
+function detectFrameworkFromSchema(schema: string): Framework {
+  if (schema.includes('shadcn-vue')) return 'vue';
+  if (schema.includes('shadcn-svelte')) return 'svelte';
+  return 'react';
+}
+
+async function detectFrameworkFromPackageJson(): Promise<Framework> {
+  const packageJsonPath = 'package.json';
+  
+  if (!fs.existsSync(packageJsonPath)) return 'react';
+  
+  try {
+    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const allDeps = {
+      ...packageJson.dependencies,
+      ...packageJson.devDependencies,
+    };
+    
+    // Check for Vue
+    if (allDeps.vue || allDeps['@vue/cli'] || allDeps.nuxt) {
+      return 'vue';
+    }
+    
+    // Check for Svelte
+    if (allDeps.svelte || allDeps['@sveltejs/kit']) {
+      return 'svelte';
+    }
+    
+    // Default to React
+    return 'react';
+  } catch (error) {
+    console.warn('Failed to read package.json, defaulting to React:', error);
+    return 'react';
+  }
+}
+
+async function detectFramework(): Promise<Framework> {
+  if (fs.existsSync(configurationTarget)) {
+    try {
+      const config = JSON.parse(await fs.readFile(configurationTarget, 'utf-8'));
+      if (config.$schema) {
+        return detectFrameworkFromSchema(config.$schema);
+      }
+    } catch (error) {
+      console.warn('Failed to parse components.json:', error);
+    }
+  }
+  
+  return await detectFrameworkFromPackageJson();
+}
+
+const framework = await detectFramework();
+const frameworkConfig = frameworkConfigs[framework];
+
+if (!fs.existsSync(configurationTarget)) {
+  await fs.writeJSON(configurationTarget, frameworkConfig.defaultConfig, { spaces: 2 });
 }
 const componentsFilePath = 'components/ui';
 const indexFilePath = path.join(componentsFilePath, '../index.ini');
@@ -57,7 +176,8 @@ async function addComponents(...components: string[]) {
 
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
-  await $`shadcn add -y -o ${components}`;
+  const cliCommand = frameworkConfig.cliCommand;
+  await $`${cliCommand} add -y -o ${components}`;
 
   await addIndex(...components);
 
