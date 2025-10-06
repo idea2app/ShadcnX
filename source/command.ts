@@ -18,73 +18,31 @@ type Framework = 'react' | 'vue' | 'svelte';
 interface FrameworkConfig {
   cliCommand: string;
   schema: string;
-  defaultConfig: object;
+  configPath: string;
 }
 
 const frameworkConfigs: Record<Framework, FrameworkConfig> = {
   react: {
     cliCommand: 'shadcn',
     schema: 'https://ui.shadcn.com/schema.json',
-    defaultConfig: {
-      $schema: 'https://ui.shadcn.com/schema.json',
-      tsx: true,
-      rsc: true,
-      aliases: {
-        components: '@/components',
-        utils: '@/lib/utils',
-      },
-      style: 'default',
-      tailwind: {
-        css: 'styles/global.css',
-        cssVariables: true,
-        config: 'tailwind.config.ts',
-        baseColor: 'gray',
-      },
-    },
+    configPath: 'configuration/components-react.json',
   },
   vue: {
     cliCommand: 'shadcn-vue',
     schema: 'https://www.shadcn-vue.com/schema.json',
-    defaultConfig: {
-      $schema: 'https://www.shadcn-vue.com/schema.json',
-      aliases: {
-        components: '@/components',
-        utils: '@/lib/utils',
-      },
-      style: 'default',
-      tailwind: {
-        css: 'src/assets/index.css',
-        cssVariables: true,
-        config: 'tailwind.config.js',
-        baseColor: 'slate',
-      },
-    },
+    configPath: 'configuration/components-vue.json',
   },
   svelte: {
     cliCommand: 'shadcn-svelte',
     schema: 'https://www.shadcn-svelte.com/schema.json',
-    defaultConfig: {
-      $schema: 'https://www.shadcn-svelte.com/schema.json',
-      aliases: {
-        components: '$lib/components',
-        utils: '$lib/utils',
-      },
-      style: 'default',
-      tailwind: {
-        css: 'src/app.pcss',
-        cssVariables: true,
-        config: 'tailwind.config.js',
-        baseColor: 'slate',
-      },
-    },
+    configPath: 'configuration/components-svelte.json',
   },
 };
 
-function detectFrameworkFromSchema(schema: string): Framework {
-  if (schema.includes('shadcn-vue')) return 'vue';
-  if (schema.includes('shadcn-svelte')) return 'svelte';
-  return 'react';
-}
+const detectFrameworkFromSchema = (schema: string): Framework =>
+  schema.includes('shadcn-vue') ? 'vue' :
+  schema.includes('shadcn-svelte') ? 'svelte' :
+  'react';
 
 async function detectFrameworkFromPackageJson(): Promise<Framework> {
   const packageJsonPath = 'package.json';
@@ -92,24 +50,15 @@ async function detectFrameworkFromPackageJson(): Promise<Framework> {
   if (!fs.existsSync(packageJsonPath)) return 'react';
   
   try {
-    const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8'));
+    const packageJson = await fs.readJSON(packageJsonPath);
     const allDeps = {
       ...packageJson.dependencies,
       ...packageJson.devDependencies,
     };
     
-    // Check for Vue
-    if (allDeps.vue || allDeps['@vue/cli'] || allDeps.nuxt) {
-      return 'vue';
-    }
-    
-    // Check for Svelte
-    if (allDeps.svelte || allDeps['@sveltejs/kit']) {
-      return 'svelte';
-    }
-    
-    // Default to React
-    return 'react';
+    return allDeps.vue || allDeps['@vue/cli'] || allDeps.nuxt ? 'vue' :
+           allDeps.svelte || allDeps['@sveltejs/kit'] ? 'svelte' :
+           'react';
   } catch (error) {
     console.warn('Failed to read package.json, defaulting to React:', error);
     return 'react';
@@ -135,7 +84,12 @@ const framework = await detectFramework();
 const frameworkConfig = frameworkConfigs[framework];
 
 if (!fs.existsSync(configurationTarget)) {
-  await fs.writeJSON(configurationTarget, frameworkConfig.defaultConfig, { spaces: 2 });
+  const configurationSource = localPathOf(
+    import.meta.url,
+    frameworkConfig.configPath
+  );
+
+  await fs.copy(configurationSource, configurationTarget);
 }
 const componentsFilePath = 'components/ui';
 const indexFilePath = path.join(componentsFilePath, '../index.ini');

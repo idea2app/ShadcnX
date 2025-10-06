@@ -27,7 +27,7 @@ ShadcnX automatically detects your project's framework and uses the appropriate 
 Detection priority:
 
 1. If `components.json` exists, uses the `$schema` field to determine the framework
-2. Otherwise, detects framework from `package.json` dependencies (vue, svelte, react)
+2. Otherwise, detects framework from `package.json` dependencies (`react`, `vue` or `svelte`)
 3. Defaults to React if no framework is detected
 
 ## Usage

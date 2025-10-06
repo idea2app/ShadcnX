@@ -43,7 +43,7 @@
   "scripts": {
     "install": "pnpm i shadcn -g  ||  npm i shadcn -g",
     "test": "cd test  &&  tsx ../source/command",
-    "build": "rm -rf dist/  &&  tsc  &&  cp source/components.json dist/",
+    "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/",
     "prepublishOnly": "npm t add badge button  &&  npm run build"
   }
 }
