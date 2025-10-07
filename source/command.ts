@@ -62,7 +62,7 @@ async function addComponents(...components: string[]) {
 
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
-  await $`${cliCommand} add -y -o ${components}`;
+  await $`npx ${cliCommand} add -y -o ${components}`;
 
   await addIndex(...components);
 
