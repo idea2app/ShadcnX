@@ -18,7 +18,7 @@ $.verbose = true;
 const [command, ...args] = process.argv.slice(2);
 
 const framework = await detectFramework();
-const { configPath, cliCommand } = frameworkConfigs[framework];
+const { configPath, cliCommand, fileExtension } = frameworkConfigs[framework];
 
 if (!fs.existsSync(configurationTarget)) {
   const configurationSource = localPathOf(import.meta.url, configPath);
@@ -81,11 +81,16 @@ async function editComponent(component: string) {
 
   await saveIndex(oldList);
 
-  const filePath = path.join(componentsFilePath, `${component}.tsx`).replace(/\\/g, '/');
+  const isReact = fileExtension === 'tsx';
+  const folderPath = path.join(componentsFilePath, component).replace(/\\/g, '/');
+  const filePath = isReact
+    ? `${folderPath}.tsx`
+    : path.join(folderPath, `${component[0].toUpperCase() + component.slice(1)}.${fileExtension}`);
+  const gitPath = isReact ? filePath : folderPath;
 
-  await fs.appendFile('.gitignore', `\n!${filePath}`);
+  await fs.appendFile('.gitignore', `\n!${gitPath}`);
 
-  if (fs.existsSync('.git')) await $`git add ${filePath}`;
+  if (fs.existsSync('.git')) await $`git add ${gitPath}`;
 
   try {
     await $`code ${filePath}`;

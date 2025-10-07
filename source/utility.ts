@@ -7,11 +7,9 @@ export const localPathOf = (importMetaURL: string, relativePath: string) =>
 
 export async function moveAll(sourceFolder: string, targetFolder: string) {
   for (const file of await fs.readdir(sourceFolder))
-    await fs.move(
-      path.join(sourceFolder, file),
-      path.join(targetFolder, file),
-      { overwrite: true }
-    );
+    await fs.move(path.join(sourceFolder, file), path.join(targetFolder, file), {
+      overwrite: true,
+    });
   try {
     await fs.unlink(sourceFolder);
   } catch (error) {
@@ -23,29 +21,28 @@ export const configurationTarget = 'components.json';
 
 type Framework = 'react' | 'vue' | 'svelte';
 
-type FrameworkConfig = Record<'cliCommand' | 'configPath', string>;
+type FrameworkConfig = Record<'cliCommand' | 'configPath' | 'fileExtension', string>;
 
 export const frameworkConfigs: Record<Framework, FrameworkConfig> = {
   react: {
     cliCommand: 'shadcn',
     configPath: 'configuration/components-react.json',
+    fileExtension: 'tsx',
   },
   vue: {
     cliCommand: 'shadcn-vue',
     configPath: 'configuration/components-vue.json',
+    fileExtension: 'vue',
   },
   svelte: {
     cliCommand: 'shadcn-svelte',
     configPath: 'configuration/components-svelte.json',
+    fileExtension: 'svelte',
   },
 };
 
 const detectFrameworkFromSchema = (schema: string): Framework =>
-  schema.includes('shadcn-vue')
-    ? 'vue'
-    : schema.includes('shadcn-svelte')
-    ? 'svelte'
-    : 'react';
+  schema.includes('shadcn-vue') ? 'vue' : schema.includes('shadcn-svelte') ? 'svelte' : 'react';
 
 async function detectFrameworkFromPackageJson(): Promise<Framework> {
   const packageJsonPath = 'package.json';
