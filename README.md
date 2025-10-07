@@ -7,7 +7,7 @@ A command line helper for [Shadcn UI CLI][1], `git commit` modified component co
 ## Features
 
 - 🚀 Automatic framework detection (React, Vue, Svelte)
-- 📦 Smart CLI selection based on `components.json` `$schema` or `package.json`
+- 📦 Smart CLI selection based on `components.json#$schema` or `package.json`
 - 🔧 Git-friendly: only commits modified component codes
 
 ## Installation
@@ -20,9 +20,9 @@ npm i shadcn-helper -g
 
 ShadcnX automatically detects your project's framework and uses the appropriate CLI:
 
-- **React**: Uses `shadcn` CLI (schema: `https://ui.shadcn.com/schema.json`)
-- **Vue**: Uses `shadcn-vue` CLI (schema: `https://www.shadcn-vue.com/schema.json`)
-- **Svelte**: Uses `shadcn-svelte` CLI (schema: `https://www.shadcn-svelte.com/schema.json`)
+- **React** uses `shadcn` CLI with schema `https://ui.shadcn.com/schema.json`
+- **Vue** uses `shadcn-vue` CLI with schema `https://www.shadcn-vue.com/schema.json`
+- **Svelte** uses `shadcn-svelte` CLI with schema `https://www.shadcn-svelte.com/schema.json`
 
 Detection priority:
 

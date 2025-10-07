@@ -53,6 +53,7 @@ web_modules/
 
 # Lock files
 package-lock.json
+yarn.lock
 
 # Optional eslint cache
 .eslintcache

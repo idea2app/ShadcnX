@@ -5,89 +5,23 @@ import 'array-unique-proposal';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
-import { localPathOf, moveAll } from './utility.js';
+import {
+  configurationTarget,
+  detectFramework,
+  frameworkConfigs,
+  localPathOf,
+  moveAll,
+} from './utility.js';
 
 $.verbose = true;
 
 const [command, ...args] = process.argv.slice(2);
 
-const configurationTarget = 'components.json';
-
-type Framework = 'react' | 'vue' | 'svelte';
-
-interface FrameworkConfig {
-  cliCommand: string;
-  schema: string;
-  configPath: string;
-}
-
-const frameworkConfigs: Record<Framework, FrameworkConfig> = {
-  react: {
-    cliCommand: 'shadcn',
-    schema: 'https://ui.shadcn.com/schema.json',
-    configPath: 'configuration/components-react.json',
-  },
-  vue: {
-    cliCommand: 'shadcn-vue',
-    schema: 'https://www.shadcn-vue.com/schema.json',
-    configPath: 'configuration/components-vue.json',
-  },
-  svelte: {
-    cliCommand: 'shadcn-svelte',
-    schema: 'https://www.shadcn-svelte.com/schema.json',
-    configPath: 'configuration/components-svelte.json',
-  },
-};
-
-const detectFrameworkFromSchema = (schema: string): Framework =>
-  schema.includes('shadcn-vue') ? 'vue' :
-  schema.includes('shadcn-svelte') ? 'svelte' :
-  'react';
-
-async function detectFrameworkFromPackageJson(): Promise<Framework> {
-  const packageJsonPath = 'package.json';
-  
-  if (!fs.existsSync(packageJsonPath)) return 'react';
-  
-  try {
-    const packageJson = await fs.readJSON(packageJsonPath);
-    const allDeps = {
-      ...packageJson.dependencies,
-      ...packageJson.devDependencies,
-    };
-    
-    return allDeps.vue || allDeps['@vue/cli'] || allDeps.nuxt ? 'vue' :
-           allDeps.svelte || allDeps['@sveltejs/kit'] ? 'svelte' :
-           'react';
-  } catch (error) {
-    console.warn('Failed to read package.json, defaulting to React:', error);
-    return 'react';
-  }
-}
-
-async function detectFramework(): Promise<Framework> {
-  if (fs.existsSync(configurationTarget)) {
-    try {
-      const config = JSON.parse(await fs.readFile(configurationTarget, 'utf-8'));
-      if (config.$schema) {
-        return detectFrameworkFromSchema(config.$schema);
-      }
-    } catch (error) {
-      console.warn('Failed to parse components.json:', error);
-    }
-  }
-  
-  return await detectFrameworkFromPackageJson();
-}
-
 const framework = await detectFramework();
-const frameworkConfig = frameworkConfigs[framework];
+const { configPath, cliCommand } = frameworkConfigs[framework];
 
 if (!fs.existsSync(configurationTarget)) {
-  const configurationSource = localPathOf(
-    import.meta.url,
-    frameworkConfig.configPath
-  );
+  const configurationSource = localPathOf(import.meta.url, configPath);
 
   await fs.copy(configurationSource, configurationTarget);
 }
@@ -99,8 +33,7 @@ const loadIndex = async () =>
     .split(/[\r\n]+/)
     .filter(Boolean);
 
-const saveIndex = (list: string[]) =>
-  fs.writeFile(indexFilePath, list.join('\n'));
+const saveIndex = (list: string[]) => fs.writeFile(indexFilePath, list.join('\n'));
 
 async function addIndex(...URIs: string[]) {
   const oldList = await loadIndex();
@@ -125,12 +58,10 @@ async function addComponents(...components: string[]) {
     ((await fs.readFile('.gitignore')) + '').match(
       new RegExp(String.raw`^${componentsFilePath}`, 'm')
     );
-  if (!gitIgnored)
-    await fs.appendFile('.gitignore', `\n${componentsFilePath}/*`);
+  if (!gitIgnored) await fs.appendFile('.gitignore', `\n${componentsFilePath}/*`);
 
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
-  const cliCommand = frameworkConfig.cliCommand;
   await $`${cliCommand} add -y -o ${components}`;
 
   await addIndex(...components);
@@ -143,20 +74,14 @@ async function editComponent(component: string) {
 
   const sameIndex = oldList.findIndex(URI => URI === component);
   const nameIndex =
-    sameIndex < 0
-      ? oldList.findIndex(URI => URI.endsWith(`/${component}`))
-      : sameIndex;
+    sameIndex < 0 ? oldList.findIndex(URI => URI.endsWith(`/${component}`)) : sameIndex;
   if (nameIndex < 0)
-    throw new ReferenceError(
-      `Component "${component}" is not found in ${indexFilePath}`
-    );
+    throw new ReferenceError(`Component "${component}" is not found in ${indexFilePath}`);
   oldList.splice(nameIndex, 1);
 
   await saveIndex(oldList);
 
-  const filePath = path
-    .join(componentsFilePath, `${component}.tsx`)
-    .replace(/\\/g, '/');
+  const filePath = path.join(componentsFilePath, `${component}.tsx`).replace(/\\/g, '/');
 
   await fs.appendFile('.gitignore', `\n!${filePath}`);
 
