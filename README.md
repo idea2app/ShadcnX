@@ -4,11 +4,31 @@ A command line helper for [Shadcn UI CLI][1], `git commit` modified component co
 
 [![CI & CD](https://github.com/idea2app/ShadcnX/actions/workflows/main.yml/badge.svg)][2]
 
+## Features
+
+- 🚀 Automatic framework detection (React, Vue, Svelte)
+- 📦 Smart CLI selection based on `components.json#$schema` or `package.json`
+- 🔧 Git-friendly: only commits modified component codes
+
 ## Installation
 
 ```bash
 npm i shadcn-helper -g
 ```
+
+## Framework Detection
+
+ShadcnX automatically detects your project's framework and uses the appropriate CLI:
+
+- **React** uses `shadcn` CLI with schema `https://ui.shadcn.com/schema.json`
+- **Vue** uses `shadcn-vue` CLI with schema `https://www.shadcn-vue.com/schema.json`
+- **Svelte** uses `shadcn-svelte` CLI with schema `https://www.shadcn-svelte.com/schema.json`
+
+Detection priority:
+
+1. If `components.json` exists, uses the `$schema` field to determine the framework
+2. Otherwise, detects framework from `package.json` dependencies (`react`, `vue` or `svelte`)
+3. Defaults to React if no framework is detected
 
 ## Usage
 

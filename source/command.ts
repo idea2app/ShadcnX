@@ -5,16 +5,23 @@ import 'array-unique-proposal';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
-import { localPathOf, moveAll } from './utility.js';
+import {
+  configurationTarget,
+  detectFramework,
+  frameworkConfigs,
+  localPathOf,
+  moveAll,
+} from './utility.js';
 
 $.verbose = true;
 
 const [command, ...args] = process.argv.slice(2);
 
-const configurationTarget = 'components.json';
+const framework = await detectFramework();
+const { configPath, cliCommand } = frameworkConfigs[framework];
 
 if (!fs.existsSync(configurationTarget)) {
-  const configurationSource = localPathOf(import.meta.url, configurationTarget);
+  const configurationSource = localPathOf(import.meta.url, configPath);
 
   await fs.copy(configurationSource, configurationTarget);
 }
@@ -26,8 +33,7 @@ const loadIndex = async () =>
     .split(/[\r\n]+/)
     .filter(Boolean);
 
-const saveIndex = (list: string[]) =>
-  fs.writeFile(indexFilePath, list.join('\n'));
+const saveIndex = (list: string[]) => fs.writeFile(indexFilePath, list.join('\n'));
 
 async function addIndex(...URIs: string[]) {
   const oldList = await loadIndex();
@@ -52,12 +58,11 @@ async function addComponents(...components: string[]) {
     ((await fs.readFile('.gitignore')) + '').match(
       new RegExp(String.raw`^${componentsFilePath}`, 'm')
     );
-  if (!gitIgnored)
-    await fs.appendFile('.gitignore', `\n${componentsFilePath}/*`);
+  if (!gitIgnored) await fs.appendFile('.gitignore', `\n${componentsFilePath}/*`);
 
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
-  await $`shadcn add -y -o ${components}`;
+  await $`${cliCommand} add -y -o ${components}`;
 
   await addIndex(...components);
 
@@ -69,20 +74,14 @@ async function editComponent(component: string) {
 
   const sameIndex = oldList.findIndex(URI => URI === component);
   const nameIndex =
-    sameIndex < 0
-      ? oldList.findIndex(URI => URI.endsWith(`/${component}`))
-      : sameIndex;
+    sameIndex < 0 ? oldList.findIndex(URI => URI.endsWith(`/${component}`)) : sameIndex;
   if (nameIndex < 0)
-    throw new ReferenceError(
-      `Component "${component}" is not found in ${indexFilePath}`
-    );
+    throw new ReferenceError(`Component "${component}" is not found in ${indexFilePath}`);
   oldList.splice(nameIndex, 1);
 
   await saveIndex(oldList);
 
-  const filePath = path
-    .join(componentsFilePath, `${component}.tsx`)
-    .replace(/\\/g, '/');
+  const filePath = path.join(componentsFilePath, `${component}.tsx`).replace(/\\/g, '/');
 
   await fs.appendFile('.gitignore', `\n!${filePath}`);
 

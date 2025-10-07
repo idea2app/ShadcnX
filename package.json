@@ -1,6 +1,6 @@
 {
   "name": "shadcn-helper",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "license": "LGPL-3.0-or-later",
   "author": "shiy2008@gmail.com",
   "description": "A command line helper for Shadcn UI CLI, `git commit` modified component codes only.",
@@ -22,14 +22,14 @@
   "bin": "./dist/command.js",
   "dependencies": {
     "array-unique-proposal": "^0.3.4",
-    "open": "^10.1.2",
-    "zx": "^8.5.5"
+    "open": "^10.2.0",
+    "zx": "^8.8.4"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.15.29",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "@types/node": "^22.18.8",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
@@ -38,12 +38,13 @@
   },
   "prettier": {
     "singleQuote": true,
-    "arrowParens": "avoid"
+    "arrowParens": "avoid",
+    "printWidth": 100
   },
   "scripts": {
     "install": "pnpm i shadcn -g  ||  npm i shadcn -g",
     "test": "cd test  &&  tsx ../source/command",
-    "build": "rm -rf dist/  &&  tsc  &&  cp source/components.json dist/",
+    "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/",
     "prepublishOnly": "npm t add badge button  &&  npm run build"
   }
 }
