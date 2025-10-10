@@ -25,7 +25,7 @@ if (!fs.existsSync(configurationTarget)) {
 
   await fs.copy(configurationSource, configurationTarget);
 }
-const componentsFilePath = 'components/ui';
+const componentsFilePath = `${fs.existsSync('app') ? 'app/' : ''}components/ui`;
 const indexFilePath = path.join(componentsFilePath, '../index.ini');
 
 const loadIndex = async () =>
@@ -33,7 +33,7 @@ const loadIndex = async () =>
     .split(/[\r\n]+/)
     .filter(Boolean);
 
-const saveIndex = (list: string[]) => fs.writeFile(indexFilePath, list.join('\n'));
+const saveIndex = (list: string[]) => fs.writeFile(indexFilePath, list.join('\n'), { mode: 0o777 });
 
 async function addIndex(...URIs: string[]) {
   const oldList = await loadIndex();
