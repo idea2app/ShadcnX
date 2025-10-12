@@ -25,10 +25,9 @@ if (!fs.existsSync(configurationTarget)) {
 
   await fs.copy(configurationSource, configurationTarget);
 }
-const componentsFilePath = path.join(
-  fs.existsSync('components') ? '' : fs.existsSync('app') ? 'app' : '',
-  'components/ui'
-);
+const componentsFilePath =
+  (fs.existsSync('components') ? '' : fs.existsSync('app') ? 'app/' : '') + 'components/ui';
+
 const indexFilePath = path.join(componentsFilePath, '../index.ini');
 
 const loadIndex = async () =>
@@ -61,8 +60,15 @@ async function addComponents(...components: string[]) {
     ((await fs.readFile('.gitignore')) + '').match(
       new RegExp(String.raw`^${componentsFilePath}`, 'm')
     );
-  if (!gitIgnored) await fs.appendFile('.gitignore', `\n${componentsFilePath}/*`);
-
+  if (!gitIgnored)
+    await fs.appendFile(
+      '.gitignore',
+      `
+# Shadcn UI components
+${stashPath}/
+${componentsFilePath}/*
+`
+    );
   if (hasSource) await moveAll(componentsFilePath, stashPath);
 
   await $`npx ${cliCommand} add -y -o ${components}`;
