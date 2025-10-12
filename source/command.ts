@@ -25,7 +25,10 @@ if (!fs.existsSync(configurationTarget)) {
 
   await fs.copy(configurationSource, configurationTarget);
 }
-const componentsFilePath = `${fs.existsSync('app') ? 'app/' : ''}components/ui`;
+const componentsFilePath = path.join(
+  fs.existsSync('components') ? '' : fs.existsSync('app') ? 'app' : '',
+  'components/ui'
+);
 const indexFilePath = path.join(componentsFilePath, '../index.ini');
 
 const loadIndex = async () =>
