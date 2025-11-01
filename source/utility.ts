@@ -1,7 +1,8 @@
 import { fs, path } from 'zx';
 
 export const localPathOf = (importMetaURL: string, relativePath: string) =>
-  (new URL(relativePath, importMetaURL) + '')
+  new URL(relativePath, /^\w+:/.test(importMetaURL) ? importMetaURL : `file://${importMetaURL}`)
+    .toString()
     .replace('file://' + (process.platform === 'win32' ? '/' : ''), '')
     .replace(/\\/g, '/');
 
