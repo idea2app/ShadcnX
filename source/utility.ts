@@ -1,11 +1,9 @@
+import { fileURLToPath } from 'url';
 import { fs, path } from 'zx';
 
-export const localPathOf = (importMetaURL: string, relativePath: string) =>
-  decodeURI(
-    new URL(relativePath, /^\w+:/.test(importMetaURL) ? importMetaURL : `file://${importMetaURL}`)
-      .toString()
-      .replace('file://' + (process.platform === 'win32' ? '/' : ''), '')
-      .replace(/\\/g, '/')
+export const localPathOf = (pathOrURL: string, relativePath: string) =>
+  fileURLToPath(
+    new URL(relativePath, (/^.{3,}:\/\//.test(pathOrURL) ? '' : 'file://') + pathOrURL)
   );
 
 export async function moveAll(sourceFolder: string, targetFolder: string) {
@@ -14,7 +12,7 @@ export async function moveAll(sourceFolder: string, targetFolder: string) {
       overwrite: true,
     });
   try {
-    await fs.unlink(sourceFolder);
+    await fs.rm(sourceFolder, { recursive: true, force: true });
   } catch (error) {
     console.warn(error);
   }

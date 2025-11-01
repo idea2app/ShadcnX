@@ -43,15 +43,15 @@ class ShadcnX {
     return this;
   }
 
-  loadIndex = async () =>
+ private loadIndex = async () =>
     (fs.existsSync(this.indexFilePath) ? (await fs.readFile(this.indexFilePath)) + '' : '')
       .split(/[\r\n]+/)
       .filter(Boolean);
 
-  saveIndex = (list: string[]) =>
+ private saveIndex = (list: string[]) =>
     fs.writeFile(this.indexFilePath, list.join('\n'), { mode: 0o777 });
 
-  async addIndex(...URIs: string[]) {
+ private async addIndex(...URIs: string[]) {
     const oldList = await this.loadIndex();
 
     oldList.push(...URIs);
