@@ -1,6 +1,6 @@
 {
   "name": "shadcn-helper",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "license": "LGPL-3.0-or-later",
   "author": "shiy2008@gmail.com",
   "description": "A command line helper for Shadcn UI CLI, `git commit` modified component codes only.",
@@ -18,16 +18,17 @@
   "bugs": {
     "url": "https://github.com/idea2app/ShadcnX/issues"
   },
-  "type": "module",
   "bin": "./dist/command.js",
   "dependencies": {
+    "@tech_query/node-toolkit": "2.0.0-beta.0",
     "array-unique-proposal": "^0.3.4",
+    "commander-jsx": "^0.7.1",
     "open": "^10.2.0",
-    "zx": "^8.8.4"
+    "zx": "^8.8.5"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^22.18.10",
+    "@types/node": "^22.18.13",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
@@ -42,7 +43,7 @@
     "printWidth": 100
   },
   "scripts": {
-    "test": "cd test  &&  tsx ../source/command",
+    "test": "cd test  &&  node ../dist/command",
     "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/",
     "prepublishOnly": "npm t add badge button  &&  npm run build"
   }

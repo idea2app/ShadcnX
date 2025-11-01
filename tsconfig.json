@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "module": "Node16",
+    "module": "CommonJS",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "commander-jsx",
     "outDir": "./dist"
   },
-  "include": ["source/**/*.ts"]
+  "include": ["source/**/*"]
 }
