@@ -1,10 +1,12 @@
 import { fs, path } from 'zx';
 
 export const localPathOf = (importMetaURL: string, relativePath: string) =>
-  new URL(relativePath, /^\w+:/.test(importMetaURL) ? importMetaURL : `file://${importMetaURL}`)
-    .toString()
-    .replace('file://' + (process.platform === 'win32' ? '/' : ''), '')
-    .replace(/\\/g, '/');
+  decodeURI(
+    new URL(relativePath, /^\w+:/.test(importMetaURL) ? importMetaURL : `file://${importMetaURL}`)
+      .toString()
+      .replace('file://' + (process.platform === 'win32' ? '/' : ''), '')
+      .replace(/\\/g, '/')
+  );
 
 export async function moveAll(sourceFolder: string, targetFolder: string) {
   for (const file of await fs.readdir(sourceFolder))
