@@ -45,6 +45,6 @@
   "scripts": {
     "test": "cd test  &&  node ../dist/command",
     "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/",
-    "prepublishOnly": "npm t add badge button  &&  npm run build"
+    "prepublishOnly": "npm run build  &&  npm t add badge button"
   }
 }
