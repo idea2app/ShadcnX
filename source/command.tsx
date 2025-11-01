@@ -120,7 +120,8 @@ Command.execute(
       parameters="<component...>"
       description="Add official component or components from third-party URL"
       executor={async (_options, ...components) => {
-        await addComponents(...(components.filter(c => typeof c === 'string') as string[]));
+        const componentNames = components.filter(c => typeof c === 'string') as string[];
+        await addComponents(...componentNames);
       }}
     />
     <Command
@@ -128,9 +129,10 @@ Command.execute(
       parameters="<component>"
       description="Edit a component and add it to git"
       executor={async (_options, component) => {
-        if (typeof component === 'string') {
-          await editComponent(component);
+        if (typeof component !== 'string') {
+          throw new TypeError(`Component name must be a string, got ${typeof component}`);
         }
+        await editComponent(component);
       }}
     />
     <Command
