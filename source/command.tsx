@@ -110,37 +110,23 @@ async function editComponent(component: string) {
 const installComponents = async () => addComponents(...(await loadIndex()));
 
 Command.execute(
-  <Command
-    name="shadcn-helper"
-    parameters="[command]"
-    description="A command line helper for Shadcn UI CLI, `git commit` modified component codes only."
-  >
+  <Command parameters="[command] [options]">
     <Command
       name="add"
       parameters="<component...>"
       description="Add official component or components from third-party URL"
-      executor={async (_options, ...components) => {
-        const componentNames = components.filter(c => typeof c === 'string') as string[];
-        await addComponents(...componentNames);
-      }}
+      executor={({}, ...components) => addComponents(...(components as string[]))}
     />
     <Command
       name="edit"
       parameters="<component>"
       description="Edit a component and add it to git"
-      executor={async (_options, component) => {
-        if (typeof component !== 'string') {
-          throw new TypeError(`Component name must be a string, got ${typeof component}`);
-        }
-        await editComponent(component);
-      }}
+      executor={({}, component) => editComponent(component as string)}
     />
     <Command
       name="install"
       description="Install added components"
-      executor={async () => {
-        await installComponents();
-      }}
+      executor={installComponents}
     />
   </Command>,
   process.argv.slice(2)

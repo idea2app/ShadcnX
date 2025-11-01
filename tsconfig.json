@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "Node16",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -10,5 +9,5 @@
     "jsxImportSource": "commander-jsx",
     "outDir": "./dist"
   },
-  "include": ["source/**/*.ts", "source/**/*.tsx"]
+  "include": ["source/**/*"]
 }

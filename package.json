@@ -43,8 +43,9 @@
     "printWidth": 100
   },
   "scripts": {
-    "test": "cd test  &&  tsx ../source/command.tsx",
-    "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/  &&  node scripts/fix-imports.js",
+    "postinstall": "node scripts/patch-commander-jsx.js",
+    "test": "cd test  &&  tsx ../source/command",
+    "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/",
     "prepublishOnly": "npm t add badge button  &&  npm run build"
   }
 }
