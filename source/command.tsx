@@ -2,6 +2,7 @@
 
 import 'array-unique-proposal';
 
+import { Command } from 'commander-jsx';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
@@ -14,8 +15,6 @@ import {
 } from './utility.js';
 
 $.verbose = true;
-
-const [command, ...args] = process.argv.slice(2);
 
 const framework = await detectFramework();
 const { configPath, cliCommand, fileExtension } = frameworkConfigs[framework];
@@ -110,16 +109,37 @@ async function editComponent(component: string) {
 
 const installComponents = async () => addComponents(...(await loadIndex()));
 
-switch (command) {
-  case 'add':
-    await addComponents(...args);
-    break;
-  case 'edit':
-    await editComponent(args[0]);
-    break;
-  case 'install':
-    await installComponents();
-    break;
-  default:
-    throw new ReferenceError(`Unsupported "${command}" command`);
-}
+Command.execute(
+  <Command
+    name="shadcn-helper"
+    parameters="[command]"
+    description="A command line helper for Shadcn UI CLI, `git commit` modified component codes only."
+  >
+    <Command
+      name="add"
+      parameters="<component...>"
+      description="Add official component or components from third-party URL"
+      executor={async (_options, ...components) => {
+        await addComponents(...(components.filter(c => typeof c === 'string') as string[]));
+      }}
+    />
+    <Command
+      name="edit"
+      parameters="<component>"
+      description="Edit a component and add it to git"
+      executor={async (_options, component) => {
+        if (typeof component === 'string') {
+          await editComponent(component);
+        }
+      }}
+    />
+    <Command
+      name="install"
+      description="Install added components"
+      executor={async () => {
+        await installComponents();
+      }}
+    />
+  </Command>,
+  process.argv.slice(2)
+);

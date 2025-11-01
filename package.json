@@ -22,6 +22,7 @@
   "bin": "./dist/command.js",
   "dependencies": {
     "array-unique-proposal": "^0.3.4",
+    "commander-jsx": "^0.7.1",
     "open": "^10.2.0",
     "zx": "^8.8.4"
   },
@@ -42,8 +43,8 @@
     "printWidth": 100
   },
   "scripts": {
-    "test": "cd test  &&  tsx ../source/command",
-    "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/",
+    "test": "cd test  &&  tsx ../source/command.tsx",
+    "build": "rm -rf dist/  &&  tsc  &&  cp -r source/configuration dist/  &&  sed -i 's|from \"commander-jsx/jsx-runtime\"|from \"commander-jsx/jsx-runtime.js\"|g' dist/command.js",
     "prepublishOnly": "npm t add badge button  &&  npm run build"
   }
 }
