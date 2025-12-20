@@ -80,7 +80,7 @@ class ShadcnX {
         `
 # Shadcn UI components
 ${stashPath}/
-${this.componentsFilePath}/*
+${this.componentsFilePath}/
 `
       );
     if (hasSource) await moveAll(this.componentsFilePath, stashPath);

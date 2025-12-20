@@ -2,7 +2,10 @@
 
 A command line helper for [Shadcn UI CLI][1], `git commit` modified component codes only.
 
-[![CI & CD](https://github.com/idea2app/ShadcnX/actions/workflows/main.yml/badge.svg)][2]
+[![NPM Dependency](https://img.shields.io/librariesio/github/idea2app/ShadcnX.svg)][2]
+[![CI & CD](https://github.com/idea2app/ShadcnX/actions/workflows/main.yml/badge.svg)][3]
+
+[![NPM](https://nodei.co/npm/shadcn-helper.png?downloads=true&downloadRank=true&stars=true)][4]
 
 ## Features
 
@@ -61,4 +64,6 @@ shadcn-helper edit component-name
 1. https://github.com/idea2app/Next-shadcn-ts
 
 [1]: https://ui.shadcn.com/docs/cli
-[2]: https://github.com/idea2app/ShadcnX/actions/workflows/main.yml
+[2]: https://libraries.io/npm/shadcn-helper
+[3]: https://github.com/idea2app/ShadcnX/actions/workflows/main.yml
+[4]: https://www.npmjs.com/package/shadcn-helper
