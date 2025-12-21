@@ -1,23 +1,10 @@
-import { traverse } from 'fs-match';
 import { fileURLToPath } from 'url';
-import { fs, path } from 'zx';
+import { fs } from 'zx';
 
 export const localPathOf = (pathOrURL: string, relativePath: string) =>
   fileURLToPath(
     new URL(relativePath, (/^.{3,}:\/\//.test(pathOrURL) ? '' : 'file://') + pathOrURL)
   );
-
-export async function moveAll(sourceFolder: string, targetFolder: string) {
-  for await (const fullPath of traverse(sourceFolder))
-    await fs.move(fullPath, path.join(targetFolder, fullPath.replace(sourceFolder, '')), {
-      overwrite: true,
-    });
-  try {
-    await fs.rm(sourceFolder, { recursive: true, force: true });
-  } catch (error) {
-    console.warn(error);
-  }
-}
 
 export const configurationTarget = 'components.json';
 

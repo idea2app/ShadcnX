@@ -7,13 +7,7 @@ import { Command } from 'commander-jsx';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
-import {
-  configurationTarget,
-  detectFramework,
-  frameworkConfigs,
-  localPathOf,
-  moveAll,
-} from './utility.js';
+import { configurationTarget, detectFramework, frameworkConfigs, localPathOf } from './utility.js';
 
 $.verbose = true;
 
@@ -64,8 +58,7 @@ class ShadcnX {
   }
 
   addComponents = async (...components: string[]) => {
-    const hasSource = fs.existsSync(this.componentsFilePath),
-      stashPath = path.join(this.componentsFilePath, '../.stash').replace(/\\/g, '/');
+    const hasSource = fs.existsSync(this.componentsFilePath);
 
     if (!components[0]) return console.warn('No component to add');
 
@@ -79,17 +72,15 @@ class ShadcnX {
         '.gitignore',
         `
 # Shadcn UI components
-${stashPath}/
 ${this.componentsFilePath}/
 `
       );
-    if (hasSource) await moveAll(this.componentsFilePath, stashPath);
 
     await $`npx ${this.cliCommand} add -y -o ${components}`;
 
     await this.addIndex(...components);
 
-    if (hasSource) await moveAll(stashPath, this.componentsFilePath);
+    if (hasSource) await $`git restore ${this.componentsFilePath}`;
   };
 
   editComponent = async (component: string) => {
