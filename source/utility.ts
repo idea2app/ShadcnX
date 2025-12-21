@@ -1,3 +1,4 @@
+import { traverse } from 'fs-match';
 import { fileURLToPath } from 'url';
 import { fs, path } from 'zx';
 
@@ -7,8 +8,8 @@ export const localPathOf = (pathOrURL: string, relativePath: string) =>
   );
 
 export async function moveAll(sourceFolder: string, targetFolder: string) {
-  for (const file of await fs.readdir(sourceFolder))
-    await fs.move(path.join(sourceFolder, file), path.join(targetFolder, file), {
+  for await (const fullPath of traverse(sourceFolder))
+    await fs.move(fullPath, path.join(targetFolder, fullPath.replace(sourceFolder, '')), {
       overwrite: true,
     });
   try {

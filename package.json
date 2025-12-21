@@ -1,6 +1,6 @@
 {
   "name": "shadcn-helper",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "license": "LGPL-3.0-or-later",
   "author": "shiy2008@gmail.com",
   "description": "A command line helper for Shadcn UI CLI, `git commit` modified component codes only.",
@@ -23,6 +23,7 @@
     "@tech_query/node-toolkit": "^2.0.0-beta.3",
     "array-unique-proposal": "^0.3.4",
     "commander-jsx": "^0.7.2",
+    "fs-match": "^2.0.1",
     "open": "^11.0.0",
     "zx": "^8.8.5"
   },

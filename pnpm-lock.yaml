@@ -17,6 +17,9 @@ importers:
       commander-jsx:
         specifier: ^0.7.2
         version: 0.7.2(typescript@5.9.3)
+      fs-match:
+        specifier: ^2.0.1
+        version: 2.0.1(typescript@5.9.3)
       open:
         specifier: ^11.0.0
         version: 11.0.0
@@ -266,6 +269,10 @@ packages:
   fs-extra@11.3.3:
     resolution: {integrity: sha512-VWSRii4t0AFm6ixFFmLLx1t7wS1gh+ckoa84aOeapGum0h+EZd1EhEumSB+ZdDLnEPuucsVB9oB7cxJHap6Afg==}
     engines: {node: '>=14.14'}
+
+  fs-match@2.0.1:
+    resolution: {integrity: sha512-SpfP6VA4TvOSoQaXCeXyM2X2+nRcmDfMyWVkfc4SbW3UmUZz2cIcVWW89UUTAxcHhKMXUBJtm5dCe5FHxiVQgQ==}
+    hasBin: true
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -580,6 +587,16 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.2.0
       universalify: 2.0.1
+
+  fs-match@2.0.1(typescript@5.9.3):
+    dependencies:
+      '@tech_query/node-toolkit': 2.0.0-beta.3
+      commander-jsx: 0.7.2(typescript@5.9.3)
+      fs-extra: 11.3.3
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - element-internals-polyfill
+      - typescript
 
   fsevents@2.3.3:
     optional: true

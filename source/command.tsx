@@ -43,15 +43,15 @@ class ShadcnX {
     return this;
   }
 
- private loadIndex = async () =>
+  private loadIndex = async () =>
     (fs.existsSync(this.indexFilePath) ? (await fs.readFile(this.indexFilePath)) + '' : '')
       .split(/[\r\n]+/)
       .filter(Boolean);
 
- private saveIndex = (list: string[]) =>
+  private saveIndex = (list: string[]) =>
     fs.writeFile(this.indexFilePath, list.join('\n'), { mode: 0o777 });
 
- private async addIndex(...URIs: string[]) {
+  private async addIndex(...URIs: string[]) {
     const oldList = await this.loadIndex();
 
     oldList.push(...URIs);
@@ -65,7 +65,7 @@ class ShadcnX {
 
   addComponents = async (...components: string[]) => {
     const hasSource = fs.existsSync(this.componentsFilePath),
-      stashPath = path.join(this.componentsFilePath, '../.stash');
+      stashPath = path.join(this.componentsFilePath, '../.stash').replace(/\\/g, '/');
 
     if (!components[0]) return console.warn('No component to add');
 
