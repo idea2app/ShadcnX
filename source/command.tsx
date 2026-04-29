@@ -65,7 +65,7 @@ class ShadcnX {
     const gitIgnored =
       fs.existsSync('.gitignore') &&
       ((await fs.readFile('.gitignore')) + '').match(
-        new RegExp(String.raw`^${this.componentsFilePath}`, 'm')
+        new RegExp(String.raw`^${this.componentsFilePath}`, 'm'),
       );
     if (!gitIgnored)
       await fs.appendFile(
@@ -73,14 +73,17 @@ class ShadcnX {
         `
 # Shadcn UI components
 ${this.componentsFilePath}/
-`
+`,
       );
 
     await $`npx ${this.cliCommand} add -y -o ${components}`;
 
     await this.addIndex(...components);
 
-    if (hasSource) await $`git restore ${this.componentsFilePath}`;
+    if (hasSource)
+      try {
+        await $`git restore ${this.componentsFilePath}`;
+      } catch {}
   };
 
   editComponent = async (component: string) => {
@@ -103,7 +106,7 @@ ${this.componentsFilePath}/
       ? `${folderPath}.tsx`
       : path.join(
           folderPath,
-          `${component[0].toUpperCase() + component.slice(1)}.${this.fileExtension}`
+          `${component[0].toUpperCase() + component.slice(1)}.${this.fileExtension}`,
         );
     const gitPath = isReact ? filePath : folderPath;
 
@@ -138,6 +141,6 @@ new ShadcnX().init().then(({ addComponents, editComponent, installComponents }) 
       />
       <Command name="install" description="Install added components" executor={installComponents} />
     </Command>,
-    process.argv.slice(2)
-  )
+    process.argv.slice(2),
+  ),
 );
