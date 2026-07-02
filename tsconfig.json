@@ -7,6 +7,7 @@
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
     "jsxImportSource": "commander-jsx",
+    "rootDir": "./source",
     "outDir": "./dist"
   },
   "include": ["source/**/*"]

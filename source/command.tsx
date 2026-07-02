@@ -7,7 +7,13 @@ import { Command } from 'commander-jsx';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
-import { configurationTarget, detectFramework, frameworkConfigs, localPathOf } from './utility.js';
+import {
+  configurationTarget,
+  detectFramework,
+  frameworkConfigs,
+  localPathOf,
+  type ShadcnComponentsConfig,
+} from './utility.js';
 
 $.verbose = true;
 
@@ -15,7 +21,55 @@ class ShadcnX {
   cliCommand = '';
   fileExtension = 'tsx';
   componentsFilePath = '';
+  tailwindStylePath = '';
   indexFilePath = '';
+
+  private toLocalPath(aliasPath: string) {
+    const normalized = aliasPath.trim().replace(/\\/g, '/');
+
+    if (!normalized) return 'components';
+    // Svelte default configuration
+    if (normalized === '$lib') return 'src/lib';
+    if (normalized.startsWith('$lib/')) return `src/lib/${normalized.slice('$lib/'.length)}`;
+    if (normalized.startsWith('@/')) return normalized.slice(2);
+    if (normalized.startsWith('~/')) return normalized.slice(2);
+
+    return normalized.replace(/^\.?\//, '');
+  }
+
+  private resolveComponentsFilePath(config: ShadcnComponentsConfig) {
+    const aliasPath = this.toLocalPath(config.aliases?.components || 'components');
+
+    return aliasPath.endsWith('/ui') ? aliasPath : path.join(aliasPath, 'ui').replace(/\\/g, '/');
+  }
+
+  private async ensureTailwindSource() {
+    const { tailwindStylePath } = this;
+
+    if (!tailwindStylePath) return;
+
+    const relativeComponentsPath = path
+      .relative(path.dirname(tailwindStylePath), this.componentsFilePath)
+      .replace(/\\/g, '/');
+    const sourcePath = `${relativeComponentsPath || '.'}/**/*.{js,jsx,ts,tsx,mdx,vue,svelte}`;
+    const sourceRule = `@source "${sourcePath}";`;
+
+    const styleFile = fs.existsSync(tailwindStylePath)
+      ? (await fs.readFile(tailwindStylePath)) + ''
+      : '';
+    if (styleFile.includes(sourceRule)) return;
+
+    const updatedStyle = `${styleFile.trimEnd()}
+
+/*
+ * ShadcnX CLI sets up the source rule for Tailwind CSS to include Git ignored components.
+ * Don't modify this rule if you are not a Tailwind CSS expert.
+ */
+${sourceRule}
+`;
+    await fs.ensureFile(tailwindStylePath);
+    await fs.writeFile(tailwindStylePath, updatedStyle.trimStart());
+  }
 
   async init() {
     const framework = await detectFramework();
@@ -29,9 +83,10 @@ class ShadcnX {
 
       await fs.copy(configurationSource, configurationTarget);
     }
-    this.componentsFilePath =
-      (fs.existsSync('components') ? '' : fs.existsSync('app') ? 'app/' : '') + 'components/ui';
+    const configuration = (await fs.readJSON(configurationTarget)) as ShadcnComponentsConfig;
 
+    this.componentsFilePath = this.resolveComponentsFilePath(configuration);
+    this.tailwindStylePath = (configuration.tailwind?.css || '').replace(/\\/g, '/');
     this.indexFilePath = path.join(this.componentsFilePath, '../index.ini');
 
     return this;
@@ -67,6 +122,7 @@ class ShadcnX {
       ((await fs.readFile('.gitignore')) + '').match(
         new RegExp(String.raw`^${this.componentsFilePath}`, 'm'),
       );
+
     if (!gitIgnored)
       await fs.appendFile(
         '.gitignore',
@@ -75,6 +131,8 @@ class ShadcnX {
 ${this.componentsFilePath}/
 `,
       );
+
+    await this.ensureTailwindSource();
 
     await $`npx ${this.cliCommand} add -y -o ${components}`;
 

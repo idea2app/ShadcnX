@@ -8,6 +8,31 @@ export const localPathOf = (pathOrURL: string, relativePath: string) =>
 
 export const configurationTarget = 'components.json';
 
+export type ShadcnSchemaURL =
+  | 'https://ui.shadcn.com/schema.json'
+  | 'https://www.shadcn-vue.com/schema.json'
+  | 'https://www.shadcn-svelte.com/schema.json';
+
+export interface ShadcnComponentsConfig {
+  $schema?: ShadcnSchemaURL | (string & {});
+  style?: string;
+  tsx?: boolean;
+  rsc?: boolean;
+  aliases?: {
+    components?: string;
+    utils?: string;
+    [key: string]: string | undefined;
+  };
+  tailwind?: {
+    config?: string;
+    css?: string;
+    baseColor?: string;
+    cssVariables?: boolean;
+    prefix?: string;
+  };
+  iconLibrary?: string;
+}
+
 type Framework = 'react' | 'vue' | 'svelte';
 
 type FrameworkConfig = Record<'cliCommand' | 'configPath' | 'fileExtension', string>;
@@ -58,7 +83,7 @@ async function detectFrameworkFromPackageJson(): Promise<Framework> {
 export async function detectFramework(): Promise<Framework> {
   if (fs.existsSync(configurationTarget))
     try {
-      const { $schema } = await fs.readJSON(configurationTarget);
+      const { $schema } = await fs.readJSON(configurationTarget) as ShadcnComponentsConfig;
 
       if ($schema) return detectFrameworkFromSchema($schema);
     } catch (error) {
