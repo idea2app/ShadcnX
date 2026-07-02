@@ -51,7 +51,7 @@ class ShadcnX {
     const relativeComponentsPath = path
       .relative(path.dirname(tailwindStylePath), this.componentsFilePath)
       .replace(/\\/g, '/');
-    const sourcePath = `${relativeComponentsPath || '.'}/**/*.{js,jsx,ts,tsx,mdx}`;
+    const sourcePath = `${relativeComponentsPath || '.'}/**/*.{js,jsx,ts,tsx,mdx,vue,svelte}`;
     const sourceRule = `@source "${sourcePath}";`;
 
     const styleFile = fs.existsSync(tailwindStylePath)
@@ -68,7 +68,7 @@ class ShadcnX {
 ${sourceRule}
 `;
     await fs.ensureFile(tailwindStylePath);
-    await fs.writeFile(tailwindStylePath, updatedStyle);
+    await fs.writeFile(tailwindStylePath, updatedStyle.trimStart());
   }
 
   async init() {
