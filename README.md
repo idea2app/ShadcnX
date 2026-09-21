@@ -61,7 +61,10 @@ shadcn-helper edit component-name
 
 ## User cases
 
-1. https://github.com/idea2app/Next-shadcn-ts
+1. https://github.com/idea2app/MobX-RESTful-Shadcn
+2. https://github.com/idea2app/Next-shadcn-ts
+3. https://github.com/idea2app/Lark-Next-Shadcn-ts
+4. https://github.com/idea2app/Nuxt-MobX-Shadcn-ts
 
 [1]: https://ui.shadcn.com/docs/cli
 [2]: https://libraries.io/npm/shadcn-helper

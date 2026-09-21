@@ -4,6 +4,7 @@ import 'array-unique-proposal';
 
 import { currentModulePath } from '@tech_query/node-toolkit';
 import { Command } from 'commander-jsx';
+import { createPathsMatcher, getTsconfig, type PathsMatcher } from 'get-tsconfig';
 import { $, fs, path } from 'zx';
 import open from 'open';
 
@@ -24,6 +25,29 @@ class ShadcnX {
   tailwindStylePath = '';
   indexFilePath = '';
 
+  private pathsMatcher?: PathsMatcher | null;
+
+  private toBareLocalPath(filePath: string) {
+    const normalized = filePath.trim().replace(/\\/g, '/');
+    const relativePath = path.isAbsolute(normalized)
+      ? path.relative(process.cwd(), normalized).replace(/\\/g, '/')
+      : normalized;
+
+    return relativePath.replace(/^\.?\//, '') || '';
+  }
+
+  private resolvePathMapping(aliasPath: string) {
+    const [mappedPath] = this.pathsMatcher?.(aliasPath) || [];
+
+    if (mappedPath) return this.toBareLocalPath(mappedPath);
+  }
+
+  private loadPathMappings() {
+    const tsconfig = getTsconfig();
+
+    this.pathsMatcher = tsconfig && createPathsMatcher(tsconfig);
+  }
+
   private toLocalPath(aliasPath: string) {
     const normalized = aliasPath.trim().replace(/\\/g, '/');
 
@@ -31,8 +55,12 @@ class ShadcnX {
     // Svelte default configuration
     if (normalized === '$lib') return 'src/lib';
     if (normalized.startsWith('$lib/')) return `src/lib/${normalized.slice('$lib/'.length)}`;
-    if (normalized.startsWith('@/')) return normalized.slice(2);
-    if (normalized.startsWith('~/')) return normalized.slice(2);
+
+    const mappedPath = this.resolvePathMapping(normalized);
+
+    if (mappedPath) return mappedPath;
+
+    if (normalized.startsWith('@/') || normalized.startsWith('~/')) return normalized.slice(2);
 
     return normalized.replace(/^\.?\//, '');
   }
@@ -67,8 +95,7 @@ class ShadcnX {
  */
 ${sourceRule}
 `;
-    await fs.ensureFile(tailwindStylePath);
-    await fs.writeFile(tailwindStylePath, updatedStyle.trimStart());
+    await fs.outputFile(tailwindStylePath, updatedStyle.trimStart());
   }
 
   async init() {
@@ -77,6 +104,7 @@ ${sourceRule}
 
     this.cliCommand = cliCommand;
     this.fileExtension = fileExtension;
+    this.loadPathMappings();
 
     if (!fs.existsSync(configurationTarget)) {
       const configurationSource = localPathOf(currentModulePath(), configPath);
@@ -98,7 +126,7 @@ ${sourceRule}
       .filter(Boolean);
 
   private saveIndex = (list: string[]) =>
-    fs.writeFile(this.indexFilePath, list.join('\n'), { mode: 0o777 });
+    fs.outputFile(this.indexFilePath, list.join('\n'), { mode: 0o777 });
 
   private async addIndex(...URIs: string[]) {
     const oldList = await this.loadIndex();
